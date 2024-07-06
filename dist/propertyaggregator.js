@@ -1,7 +1,20 @@
 import express from 'express';
 import axios from 'axios';
+import cors from 'cors';
 const app = express();
 const PORT = 8000;
+const allowedOrigins = ['https://mobit.app', 'http://localhost:3000'];
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin)
+            return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    }
+}));
 const fetchDOBData = async (address) => {
     const url = `https://mainnet-api.explorer.nervos.org/api/v2/nft/transfers?page=1&page_size=2147483646&to=${address}`;
     const options = {
@@ -53,7 +66,7 @@ app.get('/', async (req, res) => {
         const filteredSudtAccounts = udtAccounts.filter((udt) => udt.udt_type === 'sudt');
         const filterbitAccounts = udtAccounts.filter((udt) => udt.symbol === '.bit');
         const filteredDOBAccounts = dobAccounts.filter((dob) => dob.to === dob.item.owner && dob.item.standard === 'spore' && dob.item.cell.status === 'live' && dob.from !== dob.to);
-        res.json({ propertyAggregator: filterbitAccounts, filteredSudtAccounts, filteredDOBAccounts });
+        res.json({ bitAccounts: filterbitAccounts, sudtAccounts: filteredSudtAccounts, dobAccounts: filteredDOBAccounts });
     }
     catch (error) {
         console.error('Error:', error);
