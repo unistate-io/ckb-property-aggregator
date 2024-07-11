@@ -276,8 +276,8 @@ app.get("/", async (req, res) => {
     const DOBdata = await fetchDOBData(ckbAddress);
     const udtAccounts = data.data[0]?.attributes?.udt_accounts || [];
     const dobAccounts = DOBdata.data || [];
-    const filteredSudtAccounts = udtAccounts.filter(
-      (udt: any) => udt.udt_type === "sudt"
+    const filteredXudtAccounts = udtAccounts.filter(
+      (udt: any) => udt.udt_type === "xudt"
     );
     const filterbitAccounts = udtAccounts.filter(
       (udt: any) => udt.symbol === ".bit"
@@ -298,7 +298,7 @@ app.get("/", async (req, res) => {
 
     res.json({
       bitAccounts: parsedBitAccounts, //overview
-      sudtAccounts: filteredSudtAccounts,
+      xAccounts: filteredXudtAccounts,
       dobAccounts: parsedDOBAccounts,
     });
   } catch (error: any) {
