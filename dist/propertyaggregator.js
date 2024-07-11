@@ -31,6 +31,8 @@ const axios_1 = __importDefault(require("axios"));
 const cors_1 = __importDefault(require("cors"));
 const bitparse = __importStar(require("./bitparse"));
 const core_1 = require("@spore-sdk/core");
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = 8000;
 const allowedOrigins = ["https://mobit.app", "http://localhost:3000"];
@@ -103,7 +105,8 @@ const parsedDOBData = async (dobData) => {
             params: [args],
         };
         try {
-            const res = await fetch("https://dob-decoder.rgbpp.io/", {
+            const DOB_DECODE_URL = process.env.dob_decode;
+            const res = await fetch(DOB_DECODE_URL, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -135,7 +138,8 @@ const parsedDOBData = async (dobData) => {
     return processedData;
 };
 const fetchSpecifiedBitResponse = async (response) => {
-    const url = `https://indexer-v1.did.id`;
+    const BITINDEXER = process.env.bit_indexer;
+    const url = BITINDEXER;
     let ckbaddress;
     let bitaccount;
     if (!(!response || Object.keys(response).length === 0)) {
@@ -168,7 +172,8 @@ const fetchSpecifiedBitResponse = async (response) => {
     }
 };
 const parsedBitData = async (bitaccount, ckbAddress) => {
-    const url = `https://mainnet-api.explorer.nervos.org/api/v2/das_accounts`;
+    const BITDECODE = process.env.bit_decode;
+    const url = BITDECODE;
     const options = {
         method: "POST",
         headers: {
@@ -208,7 +213,8 @@ const parsedBitData = async (bitaccount, ckbAddress) => {
     }
 };
 const fetchBitDetails = async (bitdomain) => {
-    const url = `https://indexer-v1.did.id`;
+    const BITINDEXER = process.env.bit_indexer;
+    const url = BITINDEXER;
     const data = {
         jsonrpc: "2.0",
         id: 1,

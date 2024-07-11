@@ -4,6 +4,8 @@ import cors from "cors";
 import * as bitparse from "./bitparse";
 import { BytesLike, bytify } from "./bytify";
 import { unpackToRawClusterData, unpackToRawSporeData } from "@spore-sdk/core";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 const PORT = 8000;
@@ -107,7 +109,8 @@ const parsedDOBData = async (dobData: any) => {
     };
 
     try {
-      const res = await fetch("https://dob-decoder.rgbpp.io/", {
+      const DOB_DECODE_URL = process.env.dob_decode as string;
+      const res = await fetch(DOB_DECODE_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -144,7 +147,8 @@ const parsedDOBData = async (dobData: any) => {
 };
 
 const fetchSpecifiedBitResponse = async (response: any) => {
-  const url = `https://indexer-v1.did.id`;
+  const BITINDEXER = process.env.bit_indexer as string;
+  const url = BITINDEXER;
 
   let ckbaddress;
   let bitaccount;
@@ -181,7 +185,8 @@ const fetchSpecifiedBitResponse = async (response: any) => {
 };
 
 const parsedBitData = async (bitaccount: any, ckbAddress: string) => {
-  const url = `https://mainnet-api.explorer.nervos.org/api/v2/das_accounts`;
+  const BITDECODE = process.env.bit_decode as string;
+  const url = BITDECODE;
 
   const options = {
     method: "POST",
@@ -230,7 +235,8 @@ const parsedBitData = async (bitaccount: any, ckbAddress: string) => {
 };
 
 const fetchBitDetails = async (bitdomain: string) => {
-  const url = `https://indexer-v1.did.id`;
+  const BITINDEXER= process.env.bit_indexer as string;
+  const url = BITINDEXER;
 
   const data = {
     jsonrpc: "2.0",
