@@ -221,6 +221,12 @@ const fetchBitDetails = async (bitdomain) => {
         method: "das_accountInfo",
         params: [{ account: bitdomain }],
     };
+    const recordsdata = {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "das_accountRecordsV2",
+        params: [{ account: bitdomain }],
+    };
     try {
         const res = await fetch(url, {
             method: "POST",
@@ -229,7 +235,16 @@ const fetchBitDetails = async (bitdomain) => {
             },
             body: JSON.stringify(data),
         });
+        const records = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(recordsdata),
+        });
         const result = await res.json();
+        const recordsresult = await records.json();
+        result.records = recordsresult;
         return result;
     }
     catch (error) {
