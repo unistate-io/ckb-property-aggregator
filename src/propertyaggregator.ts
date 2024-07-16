@@ -235,13 +235,20 @@ const parsedBitData = async (bitaccount: any, ckbAddress: string) => {
 };
 
 const fetchBitDetails = async (bitdomain: string) => {
-  const BITINDEXER= process.env.bit_indexer as string;
+  const BITINDEXER = process.env.bit_indexer as string;
   const url = BITINDEXER;
 
   const data = {
     jsonrpc: "2.0",
     id: 1,
     method: "das_accountInfo",
+    params: [{ account: bitdomain }],
+  };
+
+  const recordsdata = {
+    jsonrpc: "2.0",
+    id: 1,
+    method: "das_accountRecordsV2",
     params: [{ account: bitdomain }],
   };
 
@@ -254,7 +261,17 @@ const fetchBitDetails = async (bitdomain: string) => {
       body: JSON.stringify(data),
     });
 
+    const records = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(recordsdata),
+    });
+
     const result = await res.json();
+    const recordsresult = await records.json();
+    result.records = recordsresult;
     return result;
   } catch (error: any) {
     console.error("Fetch error:", error);
