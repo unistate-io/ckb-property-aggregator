@@ -7,6 +7,7 @@ import { DOBService } from "./services/dob";
 
 Bun.serve({
   port: CONFIG.PORT,
+  idleTimeout: 60,
   async fetch(req) {
     try {
       CorsMiddleware.check(req);
@@ -74,13 +75,26 @@ async function processRequest(
     return BitService.fetchBitDetails(bitdomain);
   }
 
-  const [addressData, DOBdata] = await Promise.all([
+  const [addressDataResult, DOBdataResult] = await Promise.allSettled([
     ExplorerService.fetchAddressData(ckbAddress!),
     ExplorerService.fetchDOBData(ckbAddress!),
   ]);
 
-  const udtAccounts = addressData.data[0]?.attributes?.udt_accounts || [];
-  const dobAccounts = DOBdata.data || [];
+  // 打印错误信息到服务器控制台
+  if (addressDataResult.status === "rejected") {
+    console.error("Error fetching address data:", addressDataResult.reason);
+  }
+  if (DOBdataResult.status === "rejected") {
+    console.error("Error fetching DOB data:", DOBdataResult.reason);
+  }
+
+  const addressData =
+    addressDataResult.status === "fulfilled" ? addressDataResult.value : null;
+  const DOBdata =
+    DOBdataResult.status === "fulfilled" ? DOBdataResult.value : null;
+
+  const udtAccounts = addressData?.data[0]?.attributes?.udt_accounts || [];
+  const dobAccounts = DOBdata?.data || [];
 
   const filteredXudtAccounts = udtAccounts.filter(
     (udt: any) => udt.udt_type === "xudt",
@@ -103,11 +117,36 @@ async function processRequest(
     BitService.parseBitData(filterbitAccounts, ckbAddress!),
   ]);
 
-  return {
+  // 构建响应对象
+  const response = {
     bitAccounts: parsedBitAccounts,
     xAccounts: filteredXudtAccounts,
     dobAccounts: parsedDOBAccounts,
+    errors: {
+      addressDataError:
+        addressDataResult.status === "rejected"
+          ? addressDataResult.reason.message
+          : null,
+      DOBdataError:
+        DOBdataResult.status === "rejected"
+          ? DOBdataResult.reason.message
+          : null,
+    },
   };
+
+  // 移除 errors 中值为 null 的属性
+  Object.keys(response.errors).forEach((key) => {
+    if (response.errors[key] === null) {
+      delete response.errors[key];
+    }
+  });
+
+  // 如果 errors 对象为空，则移除整个 errors 字段
+  if (Object.keys(response.errors).length === 0) {
+    delete response.errors;
+  }
+
+  return response;
 }
 
 console.log(`Server is running on http://localhost:${CONFIG.PORT}`);
