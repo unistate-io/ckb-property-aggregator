@@ -15,19 +15,4 @@ export class CorsMiddleware {
 
     return true;
   }
-
-  static getHeaders(origin: string | null): Headers {
-    const headers = new Headers();
-
-    if (
-      origin &&
-      CONFIG.ALLOWED_ORIGINS.some((allowedOrigin) => allowedOrigin === origin)
-    ) {
-      headers.set("Access-Control-Allow-Origin", origin);
-      headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");
-      headers.set("Access-Control-Allow-Headers", "Content-Type");
-    }
-
-    return headers;
-  }
 }
