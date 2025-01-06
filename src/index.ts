@@ -58,9 +58,10 @@ Bun.serve({
         }),
         {
           status: error.message === "CORS policy violation" ? 403 : 500,
-          headers: {
+          headers: new Headers({
             "Content-Type": "application/json",
-          },
+            ...CorsMiddleware.getHeaders(origin),
+          }),
         },
       );
     }
